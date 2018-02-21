@@ -15,7 +15,7 @@ public class Application {
     private static final String tagClassName = ".extended_comment-user__name";
 
     // Add article number as a String in URL template format: "1010101/"
-    private static String urlTemplate = "http://news.ngs.ru/comments/";
+    private static String urlTemplate = "comments/";
 
     private static final String linesSplitter = "--------------------------------------";
 

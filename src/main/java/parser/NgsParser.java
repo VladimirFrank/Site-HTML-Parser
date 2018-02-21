@@ -66,4 +66,12 @@ public class NgsParser{
         }
         return articlesLinkList;
     }
+
+    public Set<String> replaceAllMoreToComments(Set<String> links){
+        Set<String> linksToCommentsPages = new HashSet<>();
+        for(String link : links){
+            linksToCommentsPages.add(link.replace("more", "comments"));
+        }
+        return linksToCommentsPages;
+    }
 }
