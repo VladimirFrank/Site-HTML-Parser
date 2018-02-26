@@ -21,7 +21,6 @@ public class NgsParser{
     private final String articlesTagClass = ".home_article2";
     private final String linkTag = "a";
 
-    //private final String url = ;
 
     public String parseByTagName(String tagName) {
         return null;
@@ -50,12 +49,20 @@ public class NgsParser{
     }
 
 
-    public Set<String> getListArticlesLink() throws IOException {
+    /**
+     *
+     * @param lastArticlesPage - last news list on site. Ex: http://news.ngs.ru/news/all/page/2/
+     * @return Set <String> URLs to comment pages.
+     * @throws IOException
+     */
+    public Set<String> getArticlesCommentPages(int lastArticlesPage) throws IOException {
+        if(lastArticlesPage < 1){}
+
         String allNewsURLTemplate = "http://news.ngs.ru/news/all/page/";
         Set<String> articlesLinkList = new HashSet<>();
 
 
-        for(int i = 1; i < 11; i++){
+        for(int i = 1; i < lastArticlesPage; i++){
             Document document = Jsoup.connect(allNewsURLTemplate + String.valueOf(i) + "/").get();
             Elements elements = document.select(articlesTagClass).select(linkTag);
             if(elements != null){
@@ -64,10 +71,15 @@ public class NgsParser{
                 }
             }
         }
-        return articlesLinkList;
+        return replaceAllMoreToComments(articlesLinkList);
     }
 
-    public Set<String> replaceAllMoreToComments(Set<String> links){
+    /**
+     *
+     * @param links - URLs to news articles.
+     * @return unique URLs to comments pages linked with same articles.
+     */
+    private Set<String> replaceAllMoreToComments(Set<String> links){
         Set<String> linksToCommentsPages = new HashSet<>();
         for(String link : links){
             linksToCommentsPages.add(link.replace("more", "comments"));

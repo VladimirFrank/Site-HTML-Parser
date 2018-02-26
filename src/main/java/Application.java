@@ -1,10 +1,8 @@
-import collections.FileStringWriter;
 import parser.NgsParser;
-
+import repository.NgsDataRepository;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -12,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class Application {
 
-    private static final String tagClassName = ".extended_comment-user__name";
+    private static final String usernameTagClass = ".extended_comment-user__name";
 
     // Add article number as a String in URL template format: "1010101/"
     private static String urlTemplate = "comments/";
@@ -27,54 +25,34 @@ public class Application {
         Instant startTime = Instant.now();
 
         NgsParser ngsParser = new NgsParser();
+        NgsDataRepository dataRepository = new NgsDataRepository();
 
-        // Array of articles numbers.
-        List<String> articlesNumbers = new ArrayList<>();
+        try {
+            dataRepository.setUrlToArticles(ngsParser.getArticlesCommentPages(5));
 
+            for(String commentPageUrl : dataRepository.getUrlToArticles()){
+                dataRepository.addNonUniqueUserNickname(ngsParser.parseByTagClass(commentPageUrl, usernameTagClass));
 
-
-        for(int i = 53_549_800; i < 53_550_000; i++){
-            articlesNumbers.add(String.valueOf(i) + "/");
-        }
-
-        articlesNumbers.add("53561341/");
-        articlesNumbers.add("53559771/");
-        articlesNumbers.add("53549661/");
-
-        // Array of user's nicknames.
-        List<String> userNameList = new LinkedList<>();
-
-        for(String articleNumber : articlesNumbers){
-            try {
-                userNameList.addAll(ngsParser.parseByTagClass(urlTemplate + articleNumber, tagClassName));
-                System.out.println(linesSplitter);
-                System.out.println(userNameList.size());
-                System.out.println(linesSplitter);
-            } catch (IOException e) {
-                numbersOfExceptions.getAndIncrement();
-                e.printStackTrace();
             }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            numbersOfExceptions.getAndIncrement();
         }
 
-        for(String userName : userNameList){
+        for(String userName : dataRepository.getAllUserNicknames()){
             System.out.println(userName);
         }
 
-        printNickNamesCount(userNameList);
-
-
         System.out.println(linesSplitter);
         System.out.println("TOTAL NON UNIQUE USER'S NAMES ARRAY:");
-        System.out.println(userNameList.size());
+        System.out.println(dataRepository.getAllUserNicknames().size());
         System.out.println(linesSplitter);
-
 
         System.out.println(linesSplitter);
         System.out.println("COUNT OF EXCEPTIONS:");
         System.out.println(numbersOfExceptions.get());
         System.out.println(linesSplitter);
-
-
 
         // End time for execution
         Instant endTime = Instant.now();
@@ -83,13 +61,5 @@ public class Application {
         System.out.println(Duration.between(startTime, endTime));
         System.out.println(linesSplitter);
 
-
-    }
-
-    private static void printNickNamesCount(List<String> userNames){
-        Set<String> uniqueUserNames = new HashSet<>(userNames);
-        for(String userName : uniqueUserNames){
-            System.out.println(userName + ": " + Collections.frequency(userNames, userName));
-        }
     }
 }
